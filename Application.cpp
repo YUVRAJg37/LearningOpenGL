@@ -92,26 +92,20 @@ int main()
 
 
 	float vertices[] = {
-		0.5f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f,
+		0.0f, 0.75f, 0.0f,
+		0.0f, 0.5f, 0.0f,
+		-0.25f, 0.625f, 0.0f,
+		0.0f, 0.5f, 0.0f,
 		-0.5f, -0.5f, 0.0f,
+		+0.5f, -0.5f, 0.0f
 	};
 
-	unsigned int indices[] = {
-		0, 1, 3, //First Triangle
-		0,2,3	//Second Triangle 
-	};
-
-	unsigned int VBO, VAO, EBO;
+	unsigned int VBO, VAO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
 	glUseProgram(shaderProgram);
@@ -135,8 +129,7 @@ int main()
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		//Check and call events and swap buffers
 		glfwSwapBuffers(window);
