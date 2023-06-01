@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <../Shader/shader.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -123,6 +126,7 @@ int main()
 	glUniform1i(glGetUniformLocation(ourShader.ID, "ourTexture_1"), 0);
 	ourShader.setInt("ourTexture_2", 1);
 
+
 	while(!glfwWindowShouldClose(window))
 	{
 		//Input
@@ -142,6 +146,15 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture_2);
 
+
+		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		// get matrix's uniform location and set matrix
+		ourShader.use();
+		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		ourShader.use();
 		glBindVertexArray(VAO);
