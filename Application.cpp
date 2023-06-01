@@ -15,6 +15,8 @@ void ProcessInput(GLFWwindow* window);
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
 
+float alpha = 0.2;
+
 int main()
 {
 	glfwInit();
@@ -45,10 +47,10 @@ int main()
 
 	float vertices[] = {
 		//Vertices                 Colors				  Textures
-		0.5f,  0.5f, 0.0f,		 1.0f, 0.0f, 0.0f,		2.0f, 2.0f,
-		0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		2.0f, 0.0f,
+		0.5f,  0.5f, 0.0f,		 1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
+		0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		1.0f, 0.0f,
 	   -0.5f, -0.5f, 0.0f,		 0.0f, 0.0f, 1.0f,		0.0f, 0.0f,
-	   -0.5f,  0.5f, 0.0f,       1.0f, 1.0f, 0.0f,		0.0f, 2.0f
+	   -0.5f,  0.5f, 0.0f,       1.0f, 1.0f, 0.0f,		0.0f, 1.0f
 	};
 
 	unsigned indices[] = {
@@ -83,8 +85,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	int height, width, nrChannels;
 	unsigned char* data = stbi_load("textures/container.jpg", &width, &height, &nrChannels, 0);
@@ -105,8 +107,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	data = stbi_load("textures/awesomeface.png", &width, &height, &nrChannels, 0);
 	if (data)
 	{
@@ -132,7 +134,7 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		ourShader.setFloat("alpha", 0.2);
+		ourShader.setFloat("alpha", alpha);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture_1);
@@ -166,5 +168,18 @@ void ProcessInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		alpha -= 0.0001f;
+		if (alpha < 0.0f)
+			alpha = 0.0f;
+	}
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		alpha += 0.0001f;
+		if (alpha > 1.0f)
+			alpha = 1.0f;
 	}
 }
