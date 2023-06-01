@@ -128,30 +128,6 @@ int main()
 	glUniform1i(glGetUniformLocation(ourShader.ID, "ourTexture_1"), 0);
 	ourShader.setInt("ourTexture_2", 1);
 
-
-	unsigned int texture_1, texture_2;
-	glGenTextures(1, &texture_1);
-	glBindTexture(GL_TEXTURE_2D, texture_1);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	int height, width, nrChannels;
-	unsigned char* data = stbi_load("textures/container.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
 	glGenTextures(1, &texture_2);
 	stbi_set_flip_vertically_on_load(true);
 	glBindTexture(GL_TEXTURE_2D, texture_2);
@@ -199,6 +175,7 @@ int main()
 		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5f));
 
 		// get matrix's uniform location and set matrix
 		ourShader.use();
@@ -207,6 +184,18 @@ int main()
 
 		ourShader.use();
 		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		transform = glm::mat4(1.0f); 
+		transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+		float scale = sin(glfwGetTime()) * 0.5f + 0.5f;
+		transform = glm::scale(transform, glm::vec3(scale) );
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transform[0][0]);
+
+		ourShader.use();
+
+
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		//Check and call events and swap buffers
