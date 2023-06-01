@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <../Shader/shader.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -48,7 +51,7 @@ int main()
 	float vertices[] = {
 		//Vertices                 Colors				  Textures
 		0.5f,  0.5f, 0.0f,		 1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
-		0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		1.0f, 0.0f,
+	    0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		1.0f, 0.0f,
 	   -0.5f, -0.5f, 0.0f,		 0.0f, 0.0f, 1.0f,		0.0f, 0.0f,
 	   -0.5f,  0.5f, 0.0f,       1.0f, 1.0f, 0.0f,		0.0f, 1.0f
 	};
@@ -77,6 +80,54 @@ int main()
 	//Texture Attribute Pointer
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	unsigned int texture_1, texture_2;
+	glGenTextures(1, &texture_1);
+	glBindTexture(GL_TEXTURE_2D, texture_1);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int height, width, nrChannels;
+	unsigned char* data = stbi_load("textures/container.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	glGenTextures(1, &texture_2);
+	stbi_set_flip_vertically_on_load(true);
+	glBindTexture(GL_TEXTURE_2D, texture_2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	data = stbi_load("textures/awesomeface.png", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	ourShader.use();
+	glUniform1i(glGetUniformLocation(ourShader.ID, "ourTexture_1"), 0);
+	ourShader.setInt("ourTexture_2", 1);
+
 
 	unsigned int texture_1, texture_2;
 	glGenTextures(1, &texture_1);
@@ -134,6 +185,9 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+
+		float time = glfwGetTime();
+		float alpha = sin(time)*0.5f + 0.5f;
 		ourShader.setFloat("alpha", alpha);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -141,6 +195,15 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture_2);
 
+
+		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		// get matrix's uniform location and set matrix
+		ourShader.use();
+		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		ourShader.use();
 		glBindVertexArray(VAO);
