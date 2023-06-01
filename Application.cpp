@@ -45,10 +45,10 @@ int main()
 
 	float vertices[] = {
 		//Vertices                 Colors				  Textures
-		0.5f,  0.5f, 0.0f,		 1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
-		0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		1.0f, 0.0f,
+		0.5f,  0.5f, 0.0f,		 1.0f, 0.0f, 0.0f,		2.0f, 2.0f,
+		0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		2.0f, 0.0f,
 	   -0.5f, -0.5f, 0.0f,		 0.0f, 0.0f, 1.0f,		0.0f, 0.0f,
-	   -0.5f,  0.5f, 0.0f,       1.0f, 1.0f, 0.0f,		0.0f, 1.0f
+	   -0.5f,  0.5f, 0.0f,       1.0f, 1.0f, 0.0f,		0.0f, 2.0f
 	};
 
 	unsigned indices[] = {
@@ -80,8 +80,8 @@ int main()
 	glGenTextures(1, &texture_1);
 	glBindTexture(GL_TEXTURE_2D, texture_1);
 	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -132,10 +132,7 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-
-		float time = glfwGetTime();
-		float alpha = sin(time) * 0.5f + 0.5f;
-		ourShader.setFloat("alpha", alpha);
+		ourShader.setFloat("alpha", 0.2);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture_1);
