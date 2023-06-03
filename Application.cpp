@@ -15,6 +15,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 //Esc to close
 void ProcessInput(GLFWwindow* window);
 
+void fractralTriangle(unsigned int transformLoc, glm::vec3 translation, glm::mat4 matrix, int depth);
+
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 800;
 
@@ -48,15 +50,13 @@ int main()
 
 	float vertices[] = {
 		//Vertices                 Colors				  Textures
-		0.5f,  0.5f, 0.0f,		 1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
-	    0.5f, -0.5f, 0.0f,		 0.0f, 1.0f, 0.0f,		1.0f, 0.0f,
-	   -0.5f, -0.5f, 0.0f,		 0.0f, 0.0f, 1.0f,		0.0f, 0.0f,
-	   -0.5f,  0.5f, 0.0f,       1.0f, 1.0f, 0.0f,		0.0f, 1.0f
+		0.0f,  -1.0f, 0.0f,		 1.0f, 0.0f, 0.0f,		0.48f, -1.5f,
+		-1.0f, 1.0f, 0.0f,		 0.0f, 1.0f, 0.0f,		-0.13f, 0.0f,
+	   1.0f, 1.0f, 0.0f,		 0.0f, 0.0f, 1.0f,		1.23f, 0.0f,
 	};
 
 	unsigned indices[] = {
-		0, 1, 3,
-		1, 2, 3
+		0, 1, 3
 	};
 
 	unsigned int VBO, VAO, EBO;
@@ -126,7 +126,6 @@ int main()
 	glUniform1i(glGetUniformLocation(ourShader.ID, "ourTexture_1"), 0);
 	ourShader.setInt("ourTexture_2", 1);
 
-
 	while(!glfwWindowShouldClose(window))
 	{
 		//Input
@@ -146,7 +145,9 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture_2);
 
-
+		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+		fractralTriangle(transformLoc, glm::vec3(0, -0.5f, 0.0f), glm::mat4(1.0f), 4);
+		/*
 		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -154,11 +155,11 @@ int main()
 		// get matrix's uniform location and set matrix
 		ourShader.use();
 		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));*/
 
 		ourShader.use();
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
 		//Check and call events and swap buffers
 		glfwSwapBuffers(window);
@@ -183,4 +184,23 @@ void ProcessInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
+}
+
+void fractralTriangle(unsigned int transformLoc, glm::vec3 translation, glm::mat4 matrix, int depth)
+{
+	if (depth < 0)
+		return;
+
+	matrix = glm::translate(matrix, translation);
+	matrix = glm::scale(matrix, glm::vec3(0.5f));
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+
+	depth--;
+
+	fractralTriangle(transformLoc, glm::vec3(0.0f, 1.5f, 0.0f), matrix, depth);
+	fractralTriangle(transformLoc, glm::vec3(-1.0f, -0.5f, 0.0f), matrix, depth);
+	matrix = glm::scale(matrix, glm::vec3(-1.0f, 1.0f, 1.0f));
+	fractralTriangle(transformLoc, glm::vec3(-1.0f, -0.5f, 0.0f), matrix, depth);
 }
