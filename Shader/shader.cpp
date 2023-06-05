@@ -1,5 +1,7 @@
 #include "shader.h"
 
+#include <glm/gtc/type_ptr.inl>
+
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
 	std::string vertexCode;
