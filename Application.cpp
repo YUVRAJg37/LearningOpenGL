@@ -149,7 +149,15 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-  
+
+    glm::vec3 objectAmbient = glm::vec3(0.0215f, 0.1745f, 0.0215f);
+    glm::vec3 objectDiffuse = glm::vec3(0.07568f, 0.61424f, 0.07568f);
+    glm::vec3 objectSpecular = glm::vec3(0.633f, 0.727811f, 0.633f);
+    float objectShininess = 0.6*128;
+
+    
+    glm::vec3 lightSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
+
     while (!glfwWindowShouldClose(window))
     {
 
@@ -162,13 +170,28 @@ int main()
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glm::vec3 lightColor = glm::vec3(1.0f);
+
+        glm::vec3 lightAmbient = lightColor*glm::vec3(0.2f);
+        glm::vec3 lightDiffuse = lightColor*glm::vec3(0.5f);
+
         objectShader.use();
         glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
-        glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        //glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         glUniform3fv(glGetUniformLocation(objectShader.ID, "objectColor"), 1, &objectColor[0]);
         glUniform3fv(glGetUniformLocation(objectShader.ID, "lightColor"), 1, &lightColor[0]);
         glUniform3f(glGetUniformLocation(objectShader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
         glUniform3f(glGetUniformLocation(objectShader.ID, "viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+
+        glUniform3f(glGetUniformLocation(objectShader.ID, "material.ambient"), objectAmbient.x, objectAmbient.y, objectAmbient.z);
+        glUniform3f(glGetUniformLocation(objectShader.ID, "material.diffuse"), objectDiffuse.x, objectDiffuse.y, objectDiffuse.z);
+        glUniform3f(glGetUniformLocation(objectShader.ID, "material.specular"), objectSpecular.x, objectSpecular.y, objectSpecular.z);
+        glUniform1f(glGetUniformLocation(objectShader.ID, "material.shininess"), objectShininess);
+
+        glUniform3f(glGetUniformLocation(objectShader.ID, "light.ambient"), lightAmbient.x, lightAmbient.y, lightAmbient.z);
+        glUniform3f(glGetUniformLocation(objectShader.ID, "light.diffuse"), lightDiffuse.x, lightDiffuse.y, lightDiffuse.z);
+        glUniform3f(glGetUniformLocation(objectShader.ID, "light.specular"), lightSpecular.x, lightSpecular.y, lightSpecular.z);
+
 
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -189,7 +212,11 @@ int main()
         lightShader.use();
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, &view[0][0]);
+
+        glUniform3f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z);
+
         model = glm::mat4(1.0f);
+
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
